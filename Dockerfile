@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Dependency sistem minimal yang dibutuhkan Pillow & mysqlclient/cryptography
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+RUN mkdir -p static/uploads
+
+# Koyeb (dan kebanyakan platform container lain) inject $PORT saat runtime
+ENV PORT=8000
+EXPOSE 8000
+
+CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
