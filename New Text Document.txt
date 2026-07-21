@@ -1,1 +1,0 @@
-Karena arsitektur ini menggunakan metode scaling yang menyeimbangkan kedalaman, lebar, dan resolusi jaringan secara bersamaan, sehingga lebih efisien dan akurat dibandingkan CNN standar.
