@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Tentang Sistem - RiceGuard AI{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mb-20 px-4">
+    
+    <div class="text-center mb-12">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800">Tentang RiceGuard AI</h2>
+        <div class="w-16 h-1 bg-emerald-500 mx-auto mt-4 rounded-full"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition duration-300 flex flex-col justify-center">
+            <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <span>🌾</span> Latar Belakang Proyek
+            </h3>
+            <p class="text-slate-600 leading-relaxed text-sm text-justify">
+                Sistem ini dibangun sebagai bagian dari proyek penelitian tugas akhir (Skripsi) untuk mendeteksi penyakit tanaman padi secara otomatis. Dengan memanfaatkan teknik visi komputer, sistem diharapkan mampu menjadi inovasi yang mempermudah identifikasi dini gangguan tanaman di sektor pertanian, khususnya pada studi kasus di <strong>Pertanian RW 02 Sumpiuh - Kabupaten Banyumas</strong>.
+            </p>
+        </div>
+
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-8 rounded-2xl shadow-sm border border-emerald-100 flex flex-col justify-center items-center text-center hover:shadow-md transition duration-300">
+            <div class="w-20 h-20 bg-white border-4 border-emerald-200 rounded-full flex items-center justify-center text-4xl shadow-sm mb-4">
+                👨‍💻
+            </div>
+            <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Dikembangkan Oleh</p>
+            <h4 class="text-2xl font-black text-slate-800">Wildan Ghifari</h4>
+            <p class="text-sm text-slate-500 mt-2 leading-relaxed">
+                Mahasiswa Program Studi Teknik Informatika<br>
+                Universitas Pamulang (UNPAM)
+            </p>
+        </div>
+
+    </div>
+
+    <div class="mb-6">
+        <div class="text-center mb-8">
+            <h3 class="text-2xl font-extrabold text-slate-800">Detail Spesifikasi Teknis</h3>
+            <p class="text-slate-500 text-sm mt-1">Teknologi di balik arsitektur RiceGuard AI</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 hover:shadow-md transition duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-2xl shrink-0">🧠</div>
+                    <div>
+                        <p class="text-lg font-bold text-slate-800">EfficientNet-B0</p>
+                        <p class="text-[11px] text-slate-500 uppercase tracking-wider font-bold">Arsitektur Deep Learning</p>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed text-justify">
+                    Model <strong>Convolutional Neural Network (CNN)</strong> yang menggunakan metode <i>compound scaling</i> untuk menyeimbangkan kedalaman, lebar, dan resolusi jaringan secara merata. Dipilih karena mampu menghasilkan tingkat akurasi ekstraksi fitur klasifikasi yang tinggi dengan beban komputasi yang efisien.
+                </p>
+            </div>
+            
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-orange-400 hover:shadow-md transition duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center text-2xl shrink-0">🔥</div>
+                    <div>
+                        <p class="text-lg font-bold text-slate-800">PyTorch & timm</p>
+                        <p class="text-[11px] text-slate-500 uppercase tracking-wider font-bold">Framework Kecerdasan Buatan</p>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed text-justify">
+                    Pustaka <i>machine learning</i> sumber terbuka yang kuat untuk membangun tensor dan melatih model AI. Dipadukan dengan pustaka <strong>PyTorch Image Models (timm)</strong> guna mengimplementasikan struktur <i>pre-trained</i> dari arsitektur gambar mutakhir secara cepat dan stabil.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-slate-400 hover:shadow-md transition duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center text-2xl shrink-0">⚙️</div>
+                    <div>
+                        <p class="text-lg font-bold text-slate-800">Flask Python</p>
+                        <p class="text-[11px] text-slate-500 uppercase tracking-wider font-bold">Web Server Terintegrasi</p>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed text-justify">
+                    Sebuah <strong>micro web framework</strong> berbasis Python yang ringan namun tangguh. Bertugas sebagai <i>backend API</i> yang menjembatani interaksi pengguna, mengeksekusi model AI secara <i>real-time</i> untuk prediksi gambar, dan mengelola logika riwayat ke dalam basis data MySQL.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-cyan-400 hover:shadow-md transition duration-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-12 h-12 bg-cyan-50 rounded-lg flex items-center justify-center text-2xl shrink-0">🎨</div>
+                    <div>
+                        <p class="text-lg font-bold text-slate-800">Tailwind CSS</p>
+                        <p class="text-[11px] text-slate-500 uppercase tracking-wider font-bold">Gaya Antarmuka Komponen</p>
+                    </div>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed text-justify">
+                    <i>Framework</i> CSS dengan metode <strong>utility-first</strong> yang memfasilitasi perancangan antarmuka (UI) dengan sangat pesat tanpa hambatan, selaras dengan metode perancangan <i>Rapid Application Development</i> (RAD). Menghasilkan tampilan yang rapi, dinamis, dan responsif.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

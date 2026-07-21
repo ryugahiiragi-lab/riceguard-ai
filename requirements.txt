@@ -1,0 +1,11 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+PyMySQL==1.1.1
+cryptography==42.0.8
+gunicorn==22.0.0
+torch==2.3.1
+torchvision==0.18.1
+timm==1.0.7
+Pillow==10.4.0

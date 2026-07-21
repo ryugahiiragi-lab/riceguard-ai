@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Deteksi Penyakit - RiceGuard AI{% endblock %}
+
+{% block content %}
+
+<div id="prediksi" class="pt-2 mb-10 max-w-5xl mx-auto px-4">
+    <div class="text-center mb-8">
+        <h2 class="text-3xl font-extrabold text-slate-800">Mulai Analisis Daun</h2>
+        <p class="text-slate-500 text-sm mt-1">Unggah foto daun padi Anda di bawah ini</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between h-fit">
+            <form action="/predict" method="post" enctype="multipart/form-data" id="uploadForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div id="uploadArea" class="border-2 border-dashed border-emerald-200 rounded-lg p-10 text-center bg-emerald-50/30 transition-all duration-300">
+                    <input type="file" name="file" id="fileInput" accept="image/*" capture="environment" onchange="previewImage(event)" class="mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer" required>
+                    <p class="text-xs text-slate-400">Ambil foto daun padi langsung dari sawah atau galeri</p>
+                </div>
+
+                <div id="previewArea" class="hidden text-center mt-2 transition-all duration-300">
+                    <p class="text-xs font-bold text-slate-500 uppercase mb-2">Pratinjau Foto Anda:</p>
+                    <img id="imagePreview" src="" alt="Pratinjau Daun Padi" class="max-h-60 mx-auto rounded-lg shadow-sm border border-slate-200 mb-5 object-cover">
+                    
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center mt-4">
+                        <button type="button" onclick="cancelUpload()" class="w-full sm:w-auto bg-slate-100 border border-slate-300 text-slate-600 py-2.5 px-6 rounded-lg font-bold hover:bg-slate-200 transition text-sm">
+                            Ganti Foto (Batal)
+                        </button>
+                        <button type="submit" onclick="this.innerHTML='Memproses AI...'; this.disabled=true; this.form.submit();" class="w-full sm:w-auto bg-emerald-600 text-white py-2.5 px-6 rounded-lg font-bold hover:bg-emerald-700 transition shadow-md text-sm">
+                            Analisis & Simpan
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full" id="resultArea">
+            {% if result %}
+            <div class="text-center flex-grow">
+                <img src="{{ '/' + result.image_path }}" class="w-44 h-44 object-cover mx-auto rounded-lg mb-4 shadow-md border-4 border-white">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hasil Prediksi:</h3>
+                
+                {% if result.class == "Tidak Dikenali" %}
+                    <div class="text-2xl font-black text-red-500 my-1">{{ result.class }}</div>
+                {% else %}
+                    <div class="text-2xl font-black text-emerald-600 my-1">{{ result.class }}</div>
+                {% endif %}
+                
+                <div class="inline-block bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold mb-4">
+                    Tingkat Kepercayaan: {{ result.confidence }}
+                </div>
+
+                <div class="mt-2 mb-4 text-left bg-slate-50 p-3 rounded-lg border border-slate-200/60 max-w-sm mx-auto">
+                    <span class="text-[11px] font-bold text-slate-400 uppercase block mb-1">Rincian Komparasi Nilai Probabilitas:</span>
+                    <div class="space-y-1 text-xs">
+                        {% for class, prob in result.all_prob.items() %}
+                            <div class="flex justify-between border-b border-slate-100 pb-0.5">
+                                <span class="text-slate-600">{{ class }}</span>
+                                <span class="font-bold text-slate-800">{{ prob }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 border-l-4 border-emerald-500 rounded-r-lg text-left mb-4 shadow-sm">
+                    <h4 class="font-bold text-slate-700 text-xs mb-0.5">💡 Saran Penanganan Singkat:</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">{{ result.solusi }}</p>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100">
+                    <p class="text-[11px] text-slate-400 italic leading-relaxed text-center">
+                        <span class="font-bold text-slate-500">Disclaimer:</span> Sistem ini merupakan alat bantu deteksi dini berbasis kecerdasan buatan untuk keperluan riset dan akademik. Hasil keputusan akhir di lapangan disarankan berkonsultasi dengan pengawasan pakar pertanian asli.
+                    </p>
+                </div>
+            </div>
+
+            {% if result.id %}
+            <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col items-center bg-slate-50 -mx-6 -mb-6 p-4 rounded-b-xl">
+                <p class="text-[11px] text-slate-400 italic mb-2">Data ini otomatis tersimpan di Dasbor Pengawas.</p>
+                <form action="/delete-scan/{{ result.id }}" method="post" onsubmit="removeLocalHistory('{{ result.id }}'); return confirm('⚠️ Apakah Anda yakin ingin membatalkan hasil analisis ini?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-100 transition flex items-center gap-1 shadow-sm">
+                        🗑️ Hapus & Batalkan
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="h-full flex flex-col items-center justify-center text-slate-400 italic py-24">
+                <p class="text-sm">Hasil prediksi beserta rincian seluruh probabilitas model akan tampil di sini setelah gambar dikirim.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // FIX SAKTI: Auto-scroll KINI HANYA AKTIF JIKA FLASK MENGIRIMKAN HASIL PREDIKSI
+    window.onload = function() {
+        {% if result %}
+        const resultArea = document.getElementById("resultArea");
+        if (resultArea) {
+            setTimeout(function() {
+                resultArea.scrollIntoView({ behavior: "smooth", block: "center" });
+            }, 150);
+        }
+        {% endif %}
+    };
+
+    // Fungsi pratinjau foto
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('imagePreview').src = e.target.result;
+                document.getElementById('uploadArea').classList.add('hidden');
+                document.getElementById('previewArea').classList.remove('hidden');
+            }
+            reader.readAsDataURL(file); 
+        }
+    }
+
+    // Fungsi batalkan
+    function cancelUpload() {
+        document.getElementById('fileInput').value = ""; 
+        document.getElementById('imagePreview').src = "";
+        document.getElementById('previewArea').classList.add('hidden');
+        document.getElementById('uploadArea').classList.remove('hidden');
+    }
+
+    // Penyimpanan Riwayat
+    {% if result and result.id %}
+    function saveToLocalHistory() {
+        const scanData = {
+            id: "{{ result.id }}",
+            class_name: "{{ result.class }}",
+            confidence: "{{ result.confidence }}",
+            image_path: "{{ '/' + result.image_path }}",
+            date: new Date().toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' })
+        };
+
+        let history = JSON.parse(localStorage.getItem('petani_history')) || [];
+        
+        const isDuplicate = history.some(item => item.id === scanData.id);
+        if (!isDuplicate) {
+            history.unshift(scanData); 
+            localStorage.setItem('petani_history', JSON.stringify(history));
+        }
+    }
+    
+    saveToLocalHistory();
+    {% endif %}
+
+    // Hapus Riwayat Lokal
+    function removeLocalHistory(id) {
+        let history = JSON.parse(localStorage.getItem('petani_history')) || [];
+        history = history.filter(item => item.id !== id); 
+        localStorage.setItem('petani_history', JSON.stringify(history));
+    }
+</script>
+{% endblock %}

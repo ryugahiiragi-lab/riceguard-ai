@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Selamat Datang - RiceGuard AI{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center py-16 text-center">
+    <div class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 max-w-2xl w-full">
+        <div class="text-6xl mb-6">🌾</div>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-slate-800 mb-4">Sistem Identifikasi Penyakit Daun Padi</h1>
+        <p class="text-slate-600 mb-8 leading-relaxed text-sm md:text-base">
+            Portal cerdas deteksi dini penyakit tanaman padi menggunakan model kecerdasan buatan EfficientNet-B0. Sistem ini dirancang khusus untuk memfasilitasi kolaborasi antara Petani dan Pengawas Lahan secara *real-time*.
+        </p>
+        
+        <div class="space-y-4">
+            <a href="/login" class="inline-block w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-md text-lg">
+                Masuk ke Sistem (Login)
+            </a>
+            <p class="text-xs text-slate-400 mt-4">
+                *Hanya pengguna terdaftar yang dapat melakukan analisis. Jika belum memiliki akun, silakan hubungi Pengawas Lahan Anda.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

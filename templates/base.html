@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RiceGuard AI{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans flex flex-col min-h-screen">
+
+    <nav class="bg-emerald-600 text-white shadow-md relative z-30">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="/" class="text-xl font-bold tracking-wide shrink-0">🌾 RiceGuard <span class="font-light text-emerald-100">AI</span></a>
+
+        <!-- Menu Desktop (tampil mulai breakpoint md) -->
+        <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <a href="/" class="hover:text-emerald-200 transition font-medium">Beranda</a>
+            <a href="/deteksi" class="hover:text-emerald-200 transition font-black text-yellow-300">Deteksi Penyakit</a>
+            <a href="/riwayat" class="hover:text-emerald-200 transition font-bold text-emerald-100">Riwayat Saya</a>
+            <a href="/about" class="hover:text-emerald-200 transition font-medium">Tentang</a>
+
+            {% if session.get('logged_in') %}
+                <a href="/admin/dashboard" class="bg-slate-800 px-3 py-1.5 rounded-md hover:bg-slate-900 transition">Dasbor Pengawas</a>
+                <a href="/logout" class="text-red-200 hover:text-red-100 transition">Keluar</a>
+            {% else %}
+                <a href="/login" class="bg-emerald-700 px-3 py-1.5 rounded-md hover:bg-emerald-800 transition">Login Pengawas</a>
+            {% endif %}
+        </div>
+
+        <!-- Tombol Hamburger (hanya tampil di mobile) -->
+        <button id="navToggleBtn" type="button" class="md:hidden p-2 -mr-2 rounded-md hover:bg-emerald-700 transition" aria-label="Buka Menu" aria-expanded="false">
+            <svg id="iconMenuOpen" class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            <svg id="iconMenuClose" class="w-7 h-7 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Menu Mobile (dropdown, hanya muncul saat hamburger diklik) -->
+    <div id="mobileMenu" class="hidden md:hidden bg-emerald-700 border-t border-emerald-500/40 shadow-lg">
+        <div class="px-4 py-3 flex flex-col space-y-1 text-sm font-medium">
+            <a href="/" class="py-2.5 px-3 rounded-lg hover:bg-emerald-600 transition">Beranda</a>
+            <a href="/deteksi" class="py-2.5 px-3 rounded-lg hover:bg-emerald-600 transition font-black text-yellow-300">Deteksi Penyakit</a>
+            <a href="/riwayat" class="py-2.5 px-3 rounded-lg hover:bg-emerald-600 transition font-bold text-emerald-100">Riwayat Saya</a>
+            <a href="/about" class="py-2.5 px-3 rounded-lg hover:bg-emerald-600 transition">Tentang</a>
+
+            {% if session.get('logged_in') %}
+                <a href="/admin/dashboard" class="py-2.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-900 transition mt-1">Dasbor Pengawas</a>
+                <a href="/logout" class="py-2.5 px-3 rounded-lg text-red-200 hover:bg-emerald-600 hover:text-red-100 transition">Keluar</a>
+            {% else %}
+                <a href="/login" class="py-2.5 px-3 rounded-lg bg-emerald-800 hover:bg-emerald-900 transition mt-1">Login Pengawas</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<script>
+    (function () {
+        const btn = document.getElementById('navToggleBtn');
+        const menu = document.getElementById('mobileMenu');
+        const iconOpen = document.getElementById('iconMenuOpen');
+        const iconClose = document.getElementById('iconMenuClose');
+
+        btn.addEventListener('click', function () {
+            const isHidden = menu.classList.contains('hidden');
+            menu.classList.toggle('hidden');
+            iconOpen.classList.toggle('hidden');
+            iconClose.classList.toggle('hidden');
+            btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+        });
+    })();
+</script>
+
+    <main class="flex-grow container mx-auto px-4 py-10 max-w-5xl">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-6 space-y-2">
+            {% for category, message in messages %}
+              <div class="p-4 rounded-lg text-sm font-bold shadow-sm flex justify-between items-center transition
+                          {% if category == 'success' %}bg-emerald-100 text-emerald-700 border border-emerald-200
+                          {% else %}bg-red-100 text-red-700 border border-red-200{% endif %}">
+                <span>{{ message }}</span>
+                <button onclick="this.parentElement.style.display='none'" class="text-xl leading-none hover:opacity-75">&times;</button>
+              </div>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="text-center py-6 text-slate-400 text-sm border-t border-slate-200 bg-white">
+        &copy; 2026 Wildan Ghifari - UNPAM TI
+    </footer>
+
+</body>
+</html>

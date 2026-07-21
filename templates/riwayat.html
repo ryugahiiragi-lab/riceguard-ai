@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}Riwayat Saya - RiceGuard AI{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mb-20 px-4">
+    
+    <div class="text-center mb-10">
+        <h2 class="text-3xl font-extrabold text-slate-800">Riwayat Scan Saya</h2>
+        <p class="text-slate-500 text-sm mt-1">Data ini tersimpan secara lokal di perangkat (HP/Laptop) Anda saat ini.</p>
+        <div class="w-16 h-1 bg-emerald-500 mx-auto mt-4 rounded-full"></div>
+    </div>
+
+    <div id="emptyState" class="hidden text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <div class="text-6xl mb-4">📭</div>
+        <h3 class="text-xl font-bold text-slate-700">Belum Ada Riwayat</h3>
+        <p class="text-slate-500 text-sm mt-2 mb-6">Anda belum melakukan analisis penyakit daun padi di perangkat ini.</p>
+        <a href="/deteksi" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-lg transition">Mulai Prediksi Sekarang</a>
+    </div>
+
+    <div id="historyContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        </div>
+
+    <div id="clearBtnContainer" class="hidden mt-10 text-center">
+        <button onclick="clearAllHistory()" class="text-slate-400 hover:text-red-500 text-xs font-bold underline transition">
+            Bersihkan Riwayat di Perangkat Ini
+        </button>
+    </div>
+
+</div>
+
+<script>
+    // Fungsi kecil untuk mencegah XSS saat data (termasuk dari server) disuntik ke innerHTML
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    // Fungsi untuk memuat data dari LocalStorage dan mencocokkannya dengan database server
+    async function loadHistory() {
+        const container = document.getElementById('historyContainer');
+        const emptyState = document.getElementById('emptyState');
+        const clearBtn = document.getElementById('clearBtnContainer');
+        
+        // 1. Ambil data lokal dari memori browser HP
+        const historyData = JSON.parse(localStorage.getItem('petani_history')) || [];
+
+        if (historyData.length === 0) {
+            emptyState.classList.remove('hidden');
+            container.classList.add('hidden');
+            clearBtn.classList.add('hidden');
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+        container.classList.remove('hidden');
+        clearBtn.classList.remove('hidden');
+        container.innerHTML = '';
+
+        // 2. Kumpulkan semua ID scan yang ada di HP Petani
+        const scanIds = historyData.map(item => parseInt(item.id)).filter(id => !isNaN(id));
+
+        // 3. Tarik data review dari server pusat secara real-time
+        let serverReviews = {};
+        if (scanIds.length > 0) {
+            try {
+                const response = await fetch('/api/check-reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scan_ids: scanIds })
+                });
+                serverReviews = await response.json();
+            } catch (error) {
+                console.error("Gagal menyinkronkan catatan pakar:", error);
+            }
+        }
+
+        // 4. Looping data dan render kartu riwayat
+        historyData.forEach(item => {
+            // Cek apakah scan ini memiliki review dari pakar di server
+            const review = serverReviews[item.id];
+            
+            // Logika penentuan warna teks dan badge untuk hasil AI asli
+            const badgeColor = item.class_name === "Tidak Dikenali" ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700";
+            const textColor = item.class_name === "Tidak Dikenali" ? "text-red-500" : "text-emerald-600";
+            
+            // Kerangka dasar kartu riwayat
+            let cardContent = `
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition gap-4">
+                <div class="flex gap-4">
+                    <img src="${escapeHtml(item.image_path)}" class="w-24 h-24 object-cover rounded-lg border border-slate-200 shrink-0">
+                    <div class="flex flex-col justify-center">
+                        <p class="text-[10px] text-slate-400 font-bold mb-1">📅 ${escapeHtml(item.date)} (ID: #${escapeHtml(item.id)})</p>
+                        <h4 class="font-black text-lg ${textColor}">${escapeHtml(item.class_name)}</h4>
+                        <div class="mt-1">
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">
+                                Keyakinan AI: ${escapeHtml(item.confidence)}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 5. BONUS FITUR: Jika ada catatan pakar, suntikkan kotak review ke dalam kartu
+            if (review) {
+                cardContent += `
+                <div class="mt-2 bg-amber-50 p-3 rounded-lg border border-amber-200 text-xs">
+                    <div class="font-bold text-amber-800 flex items-center gap-1 mb-1">
+                        📋 Catatan Evaluasi Pengawas Lahan:
+                    </div>
+                    ${review.corrected_disease ? `
+                        <p class="text-[11px] font-bold text-red-600 mb-1">
+                            ⚠️ Koreksi Diagnosis Pakar: <span class="underline">${escapeHtml(review.corrected_disease)}</span>
+                        </p>
+                    ` : ''}
+                    <p class="text-slate-700 italic">"${escapeHtml(review.pakar_note)}"</p>
+                </div>
+                `;
+            }
+
+            cardContent += `</div>`; // Tutup container kartu
+            container.innerHTML += cardContent;
+        });
+    }
+
+    // Fungsi untuk menghapus semua riwayat lokal di perangkat
+    function clearAllHistory() {
+        if (confirm("Yakin ingin menghapus semua tampilan riwayat dari HP Anda? (Data laporan di pusat tidak akan terhapus)")) {
+            localStorage.removeItem('petani_history');
+            loadHistory();
+        }
+    }
+
+    // Jalankan sinkronisasi otomatis saat halaman terbuka
+    window.onload = loadHistory;
+</script>
+{% endblock %}

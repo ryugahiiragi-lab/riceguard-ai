@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block title %}Dasbor Pengawas - RiceGuard AI{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto mb-20 px-4">
+    
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+            <h2 class="text-3xl font-extrabold text-slate-800">Dasbor Pengawas Lahan</h2>
+            <p class="text-slate-500 text-sm mt-1">Pantau riwayat deteksi publik dan kelola data master sistem.</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="document.getElementById('masterModal').classList.remove('hidden')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-sm transition flex items-center gap-2">
+                ⚙️ Kelola Master Penyakit
+            </button>
+            <div class="bg-emerald-100 text-emerald-800 px-4 py-2 rounded-lg font-bold text-sm border border-emerald-200 shadow-sm flex items-center">
+                👨‍💼 Akses: {{ session.username }}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div class="bg-slate-800 p-4 rounded-xl text-white shadow-sm">
+            <div class="text-xs text-slate-400 font-medium">Total Scan Publik</div>
+            <div class="text-2xl font-black mt-1">{{ stats.total }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500">
+            <div class="text-xs text-slate-400 font-medium">Bacterial Blight</div>
+            <div class="text-2xl font-black text-slate-800 mt-1">{{ stats.Bacterialblight }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-red-500">
+            <div class="text-xs text-slate-400 font-medium">Blast</div>
+            <div class="text-2xl font-black text-slate-800 mt-1">{{ stats.Blast }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
+            <div class="text-xs text-slate-400 font-medium">Brown Spot</div>
+            <div class="text-2xl font-black text-slate-800 mt-1">{{ stats.Brownspot }}</div>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-l-yellow-500">
+            <div class="text-xs text-slate-400 font-medium">Tungro</div>
+            <div class="text-2xl font-black text-slate-800 mt-1">{{ stats.Tungro }}</div>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-white rounded-xl border border-slate-200 shadow-sm gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400 uppercase">Filter Penyakit:</span>
+                <select onchange="location = this.value;" class="text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 focus:outline-none">
+                    <option value="/admin/dashboard?disease=all&sort={{ current_sort }}" {% if current_filter == 'all' %}selected{% endif %}>Semua Kelas AI</option>
+                    {% for d in diseases %}
+                    <option value="/admin/dashboard?disease={{ d.disease_name }}&sort={{ current_sort }}" {% if current_filter == d.disease_name %}selected{% endif %}>{{ d.disease_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex items-center gap-1 text-xs font-semibold">
+                <span class="text-slate-400 mr-1">Urutkan:</span>
+                <a href="/admin/dashboard?sort=newest&disease={{ current_filter }}" class="px-2.5 py-1.5 rounded {% if current_sort == 'newest' or not current_sort %}bg-emerald-600 text-white{% else %}text-slate-600 bg-slate-100 hover:bg-slate-200{% endif %}">Terbaru</a>
+                <a href="/admin/dashboard?sort=oldest&disease={{ current_filter }}" class="px-2.5 py-1.5 rounded {% if current_sort == 'oldest' %}bg-emerald-600 text-white{% else %}text-slate-600 bg-slate-100 hover:bg-slate-200{% endif %}">Terlama</a>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-800 text-white border-b border-slate-700">
+                        <tr>
+                            <th class="p-4 font-semibold">Waktu / Info Scan</th>
+                            <th class="p-4 font-semibold">Sampel Foto</th>
+                            <th class="p-4 font-semibold">Prediksi AI & Probabilitas</th>
+                            <th class="p-4 font-semibold">Laporan / Catatan Pakar</th>
+                            <th class="p-4 font-semibold text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for data in histories %}
+                        <tr class="hover:bg-slate-50/70 transition">
+                            
+                            <td class="p-4 space-y-1">
+                                <div class="font-bold text-slate-900">Scan #{{ data.id }}</div>
+                                <div class="text-slate-400 text-[11px]">{{ data.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                <div class="text-[11px] mt-1">
+                                    <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-200 font-medium">Petani (Publik)</span>
+                                </div>
+                            </td>
+                            
+                            <td class="p-4">
+                                <img src="{{ '/' + data.filename }}" alt="Daun" onclick="openModal(this.src)" class="w-16 h-16 object-cover rounded-md border shadow-sm cursor-pointer hover:scale-105 transition duration-150">
+                            </td>
+                            
+                            <td class="p-4 space-y-1">
+                                <div class="font-bold text-emerald-600 text-sm">
+                                    {{ data.disease.disease_name }} 
+                                    <span class="text-xs font-normal text-slate-400">({{ data.confidence }})</span>
+                                </div>
+                                
+                                <div class="bg-slate-50 p-2 rounded text-[10px] text-slate-500 space-y-0.5 border border-slate-100 max-w-[200px]">
+                                    {% for class, prob in data.parsed_prob.items() %}
+                                        <div class="flex justify-between">
+                                            <span>{{ class }}:</span><span class="font-medium text-slate-700">{{ prob }}</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            
+                            <td class="p-4 space-y-1 max-w-xs">
+                                {% if data.review %}
+                                    {% if data.review.corrected_disease %}
+                                        <div class="text-[11px] mb-1"><span class="font-bold text-red-600">Dikoreksi menjadi:</span> <span class="underline font-semibold text-slate-800">{{ data.review.corrected_disease.disease_name }}</span></div>
+                                    {% endif %}
+                                    <div class="text-slate-600 italic bg-amber-50 p-3 rounded border border-amber-100 text-[11px]">
+                                        "{{ data.review.pakar_note }}"
+                                    </div>
+                                    <div class="text-[9px] text-slate-400 mt-1">Direview oleh: {{ data.review.pakar.username }}</div>
+                                {% else %}
+                                    <span class="text-slate-400 italic text-[11px]">Belum direview oleh pakar.</span>
+                                {% endif %}
+                            </td>
+                            
+                            <td class="p-4 text-center space-y-2">
+                                <button type="button"
+                                        class="open-note-btn block w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-2 rounded-lg text-[11px] shadow-sm transition"
+                                        data-scan-id="{{ data.id }}"
+                                        data-note="{{ data.review.pakar_note if data.review else '' }}"
+                                        data-correction="{{ data.review.corrected_disease.disease_name if data.review and data.review.corrected_disease else '' }}">
+                                    Beri / Edit Catatan
+                                </button>
+                                
+                                <form action="/admin/delete/{{ data.id }}" method="post" onsubmit="return confirm('Hapus data riwayat ini permanen beserta laporannya?');" class="block w-full">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="w-full bg-slate-50 text-red-600 hover:bg-red-50 hover:text-red-700 border border-red-200 py-1.5 px-2 rounded-lg text-[11px] font-medium transition">
+                                        Hapus Data
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="p-12 text-center text-slate-400 italic bg-white text-sm">
+                                Tidak ditemukan riwayat log deteksi yang sesuai.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if pagination and pagination.pages > 1 %}
+        <div class="flex justify-center items-center gap-1.5 pt-2 text-xs font-semibold">
+            {% if pagination.has_prev %}
+                <a href="/admin/dashboard?disease={{ current_filter }}&sort={{ current_sort }}&page={{ pagination.prev_num }}" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition">‹ Sebelumnya</a>
+            {% endif %}
+
+            {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                {% if p %}
+                    <a href="/admin/dashboard?disease={{ current_filter }}&sort={{ current_sort }}&page={{ p }}" class="px-3 py-1.5 rounded-lg transition {% if p == pagination.page %}bg-emerald-600 text-white{% else %}bg-white border border-slate-200 text-slate-600 hover:bg-slate-100{% endif %}">{{ p }}</a>
+                {% else %}
+                    <span class="px-2 text-slate-300">…</span>
+                {% endif %}
+            {% endfor %}
+
+            {% if pagination.has_next %}
+                <a href="/admin/dashboard?disease={{ current_filter }}&sort={{ current_sort }}&page={{ pagination.next_num }}" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition">Selanjutnya ›</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div id="noteModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6" onclick="event.stopPropagation()">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-bold text-slate-800 uppercase">✍️ Laporan Evaluasi Pakar</h3>
+            <button onclick="closeNoteModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none">&times;</button>
+        </div>
+        
+        <form id="noteForm" action="" method="post" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Koreksi Penyakit (Jika AI Salah Mendiagnosis)</label>
+                <select name="pakar_correction" id="modalCorrection" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <option value="">-- Hasil AI Sudah Benar (Tidak Dikoreksi) --</option>
+                    {% for d in diseases %}
+                        <option value="{{ d.disease_name }}">{{ d.disease_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan Tambahan / Kondisi Lapangan</label>
+                <textarea name="pakar_note" id="modalNote" rows="4" placeholder="Tulis catatan evaluasi Anda di sini..." class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none" required></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="closeNoteModal()" class="bg-slate-100 text-slate-600 px-4 py-2.5 rounded-lg text-xs font-bold hover:bg-slate-200 transition">Batal</button>
+                <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-lg text-xs font-bold shadow-md transition">Simpan Laporan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="masterModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl border border-slate-200 max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <div class="flex justify-between items-center mb-6 border-b pb-3">
+            <h3 class="text-lg font-bold text-slate-800">⚙️ Kelola Master Solusi Penanganan</h3>
+            <button onclick="document.getElementById('masterModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none">&times;</button>
+        </div>
+        
+        <p class="text-xs text-slate-500 mb-6">Teks solusi di bawah ini akan secara otomatis ditampilkan kepada Petani di halaman publik saat sistem AI mendeteksi penyakit yang bersangkutan.</p>
+
+        <div class="space-y-6">
+            {% for d in diseases %}
+            <form action="/admin/edit-disease/{{ d.id }}" method="post" class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="flex flex-col md:flex-row md:items-start gap-4">
+                    <div class="md:w-1/3">
+                        <span class="inline-block bg-indigo-100 text-indigo-700 font-black text-sm px-3 py-1 rounded border border-indigo-200">
+                            {{ d.disease_name }}
+                        </span>
+                    </div>
+                    <div class="md:w-2/3 space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Teks Solusi Penanganan:</label>
+                        <textarea name="solution" rows="3" class="w-full text-xs p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>{{ d.solution }}</textarea>
+                        <div class="text-right">
+                            <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                                Simpan Perubahan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div id="imageModal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeModal()">
+    <div class="relative max-w-3xl max-h-[85vh] bg-white p-2 rounded-xl shadow-2xl" onclick="event.stopPropagation()">
+        <button onclick="closeModal()" class="absolute -top-4 -right-4 bg-white text-slate-800 rounded-full w-8 h-8 flex items-center justify-center font-bold shadow-md hover:bg-red-50 hover:text-red-500 transition">&times;</button>
+        <img id="modalImage" src="" class="max-w-full max-h-[75vh] rounded-lg object-contain">
+    </div>
+</div>
+
+<script>
+function openModal(imageSrc) {
+    document.getElementById('modalImage').src = imageSrc;
+    document.getElementById('imageModal').classList.remove('hidden');
+}
+
+function closeModal() {
+    document.getElementById('imageModal').classList.add('hidden');
+}
+
+function openNoteModal(id, currentNote, currentCorrection) {
+    document.getElementById('noteForm').action = '/admin/add-note/' + id;
+    document.getElementById('modalNote').value = currentNote;
+    document.getElementById('modalCorrection').value = currentCorrection;
+    document.getElementById('noteModal').classList.remove('hidden');
+}
+
+function closeNoteModal() {
+    document.getElementById('noteModal').classList.add('hidden');
+}
+
+// Data catatan diambil dari atribut data-* (bukan disuntik langsung ke JS) agar aman dari XSS
+document.querySelectorAll('.open-note-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        openNoteModal(this.dataset.scanId, this.dataset.note, this.dataset.correction);
+    });
+});
+</script>
+{% endblock %}

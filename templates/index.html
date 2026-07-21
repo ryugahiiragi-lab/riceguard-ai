@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Beranda - RiceGuard AI{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-br from-emerald-600 to-teal-900 text-white rounded-3xl p-10 md:p-20 text-center shadow-xl mb-16 relative overflow-hidden">
+    <div class="absolute top-[-50px] left-[-50px] w-48 h-48 bg-white opacity-10 rounded-full blur-2xl"></div>
+    <div class="absolute bottom-[-50px] right-[-50px] w-64 h-64 bg-emerald-300 opacity-20 rounded-full blur-3xl"></div>
+
+    <div class="relative z-10 max-w-3xl mx-auto">
+        <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-4">
+            Lindungi Panen Padi Anda dengan <span class="text-emerald-300">Kecerdasan Buatan</span>
+        </h1>
+        <p class="text-emerald-100 text-sm md:text-lg mb-10 leading-relaxed">
+            RiceGuard AI adalah asisten digital petani yang mampu mendeteksi jenis penyakit pada daun padi hanya dalam hitungan detik menggunakan teknologi Deep Learning (EfficientNet-B0).
+        </p>
+        
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="/deteksi" class="inline-block bg-white text-emerald-700 font-bold text-lg px-8 py-4 rounded-full shadow-lg hover:bg-emerald-50 hover:scale-105 transition-all duration-300 ring-4 ring-emerald-500/30">
+                🌾 Mulai Prediksi Sekarang
+            </a>
+            <a href="/riwayat" class="inline-block border-2 border-emerald-300 text-emerald-100 font-bold text-lg px-8 py-4 rounded-full hover:bg-emerald-800 hover:text-white hover:border-emerald-400 transition-all duration-300">
+                📂 Riwayat Saya
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-5xl mx-auto mb-20 px-4">
+    <div class="text-center mb-10">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800">Bagaimana Cara Kerjanya?</h2>
+        <div class="w-16 h-1 bg-emerald-500 mx-auto mt-3 rounded-full"></div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+            <div class="text-5xl mb-4">📸</div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">1. Ambil Foto Daun</h3>
+            <p class="text-sm text-slate-500">Gunakan kamera HP untuk memfoto daun padi yang terlihat bercak atau sakit langsung dari sawah.</p>
+        </div>
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+            <div class="text-5xl mb-4">🤖</div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">2. Analisis AI Server</h3>
+            <p class="text-sm text-slate-500">Sistem akan memproses piksel daun dan membandingkannya dengan ribuan data latih penyakit.</p>
+        </div>
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition">
+            <div class="text-5xl mb-4">💡</div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">3. Dapatkan Solusi</h3>
+            <p class="text-sm text-slate-500">Hasil diagnosis dan saran penanganan pestisida/pupuk akan langsung muncul di layar Anda.</p>
+        </div>
+    </div>
+</div>
+
+<div class="bg-slate-50 rounded-3xl p-8 md:p-12 mb-20 border border-slate-200">
+    <div class="text-center mb-10">
+        <h2 class="text-2xl md:text-3xl font-extrabold text-slate-800">Kenali 4 Penyakit Utama Padi</h2>
+        <p class="text-slate-500 mt-2 text-sm">Sistem kami dilatih khusus untuk mendeteksi ancaman penyakit berikut:</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-5 rounded-xl border-l-4 border-red-500 shadow-sm flex items-start gap-4">
+            <img src="{{ url_for('static', filename='images/bacterial_blight.jpg') }}" alt="Hawar Daun" class="w-16 h-16 object-cover rounded-lg border border-slate-200 shadow-sm shrink-0">
+            <div>
+                <h4 class="font-bold text-slate-800">Bacterial Blight (Hawar Daun)</h4>
+                <p class="text-xs text-slate-500 mt-1">Ditandai dengan garis basah pada tepi daun yang perlahan menguning dan mengering. Sangat menular saat musim hujan.</p>
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border-l-4 border-orange-500 shadow-sm flex items-start gap-4">
+            <img src="{{ url_for('static', filename='images/blast.jpg') }}" alt="Blas" class="w-16 h-16 object-cover rounded-lg border border-slate-200 shadow-sm shrink-0">
+            <div>
+                <h4 class="font-bold text-slate-800">Blast (Blas)</h4>
+                <p class="text-xs text-slate-500 mt-1">Muncul bercak belah ketupat dengan tepi cokelat. Dapat mematahkan leher malai (patah leher) sehingga bulir hampa.</p>
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border-l-4 border-amber-600 shadow-sm flex items-start gap-4">
+            <img src="{{ url_for('static', filename='images/brown_spot.jpg') }}" alt="Bercak Cokelat" class="w-16 h-16 object-cover rounded-lg border border-slate-200 shadow-sm shrink-0">
+            <div>
+                <h4 class="font-bold text-slate-800">Brown Spot (Bercak Cokelat)</h4>
+                <p class="text-xs text-slate-500 mt-1">Bercak oval kecil berwarna cokelat merata di daun. Sering menandakan tanah yang kekurangan nutrisi Kalium.</p>
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border-l-4 border-yellow-400 shadow-sm flex items-start gap-4">
+            <img src="{{ url_for('static', filename='images/tungro.jpg') }}" alt="Tungro" class="w-16 h-16 object-cover rounded-lg border border-slate-200 shadow-sm shrink-0">
+            <div>
+                <h4 class="font-bold text-slate-800">Tungro</h4>
+                <p class="text-xs text-slate-500 mt-1">Disebarkan oleh wereng hijau. Daun menjadi kuning-oranye dari pucuk ke bawah dan tanaman menjadi kerdil.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
